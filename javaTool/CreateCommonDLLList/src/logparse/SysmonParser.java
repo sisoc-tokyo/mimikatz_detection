@@ -206,8 +206,8 @@ public class SysmonParser {
 		    union = CollectionUtils.union(union, dlls);
 	    }
 	    outputDlls(intersection,dirname+"/dlllist.csv");
-	    TreeSet<String> dlls= new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-		dlls.addAll(union);
+	    TreeSet<String> unionDlls= new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+	    unionDlls.addAll(union);
 	    
 		File file = new File(dirname+"/allresults.csv");
 		FileWriter filewriter=null;
@@ -221,13 +221,13 @@ public class SysmonParser {
 		    //for (Iterator it = dllMap.entrySet().iterator(); it.hasNext();) {
 			for (Iterator it = dllMap.entrySet().stream().sorted(java.util.Map.Entry.comparingByKey()).iterator(); it.hasNext();) {
 			    Map.Entry<Integer,TreeSet> entry = (Map.Entry<Integer,TreeSet>)it.next();
-			    Object key = entry.getKey();
-			    pw.print(","+key);
+			    Object envName = entry.getKey();
+			    pw.print(","+envName);
 		    }
 		    pw.println();
-		    for(String dll:dlls) {
+		    for(String dll:unionDlls) {
 		    	pw.print(dll+",");
-		    	for (Iterator it = dllMap.entrySet().iterator(); it.hasNext();) {
+		    	for (Iterator it = dllMap.entrySet().stream().sorted(java.util.Map.Entry.comparingByKey()).iterator(); it.hasNext();) {
 				    Map.Entry<Integer,TreeSet> entry = (Map.Entry<Integer,TreeSet>)it.next();
 				    TreeSet<String> eachDlls = entry.getValue();
 				    if(eachDlls.contains(dll)){
