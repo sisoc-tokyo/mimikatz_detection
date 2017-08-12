@@ -123,15 +123,15 @@ public class SysmonParser {
 	/**
 	* Parse CSV files exported from Sysmon event log.
 	* Output DLLs loaded by mimikatz in each environment.
-	* @param String inputDirname 
-	* @param String outputDirname 
+	* @param inputDirname 
+	* @param outputDirname 
 	*/
-	public void outputDllsForEachEnvironment(String inputDirname, String outDirname) {
+	public void outputDllsForEachEnvironment(String inputDirname, String outputDirname) {
 		File dir = new File(inputDirname);
 		File[] files = dir.listFiles();
 		for (File file : files) {
 			String filename = file.getName();
-			String outFilename = outDirname + "/DLLlist_" + filename;
+			String outFilename = outputDirname + "/DLLlist_" + filename;
 			if (filename.endsWith(".csv")) {
 				// Read input CSV files and parse DLLs
 				readCSV(file.getAbsolutePath());
@@ -172,14 +172,14 @@ public class SysmonParser {
 	* Create Common DLL list.
 	* Output DLLs loaded by mimikatz for all environment.
 	* Create Common DLL List.
-	* @param String outputDirname 
+	* @param outputDirname 
 	*/
-	public void outputAllResults(String outDirname) {
+	public void outputAllResults(String outputDirname) {
 		Map<String, TreeSet<String>> dllMap = new HashMap<String, TreeSet<String>>();
 		BufferedReader br=null;
 		try {
 			// Read DLL lists for each environment
-			File dir = new File(outDirname);
+			File dir = new File(outputDirname);
 			File[] files = dir.listFiles();
 			for (File file : files) {
 				String filename = file.getName();
@@ -227,12 +227,12 @@ public class SysmonParser {
 			union = CollectionUtils.union(union, dlls);
 		}
 		// Create Common DLL list
-		outputDlls(intersection, outDirname + "/CommonDLLlist.csv");
+		outputDlls(intersection, outputDirname + "/CommonDLLlist.csv");
 		TreeSet<String> unionDlls = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		unionDlls.addAll(union);
 		
 		// Output DLL lists for all environment
-		File file = new File(outDirname + "/AllDLLs.csv");
+		File file = new File(outputDirname + "/AllDLLs.csv");
 		FileWriter filewriter = null;
 		BufferedWriter bw = null;
 		PrintWriter pw = null;
