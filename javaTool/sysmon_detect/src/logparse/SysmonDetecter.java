@@ -1,5 +1,9 @@
 package logparse;
 import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import org.apache.commons.collections4.*;
 import org.apache.commons.lang3.ArrayUtils;
@@ -10,15 +14,12 @@ public class SysmonDetecter {
 	private  static Map<Integer,HashSet> log;
 	private  static Map<Integer,HashSet> image;
 	private static HashSet<String> masterList=new HashSet<String>();
-	private static String masterFilename=null;
+	private static String commonDLLlistFileName=null;
 	private static String outputDirName=null;
 	private static int falsePositiveCnt=0;
 	private static int falseNegativeCnt=0;
 
 	public void readCSV(String filename){
-
-		 	log=new HashMap<Integer,HashSet>();
-		 	image=new HashMap<Integer,HashSet>();
 		 	
 		    try {
 		      File f = new File(filename);
@@ -85,7 +86,7 @@ public class SysmonDetecter {
 		    Map.Entry<Integer,HashSet> entry = (Map.Entry<Integer,HashSet>)it.next();
 		    Object key = entry.getKey();
 		    HashSet<String> imageLoadedList= (HashSet<String>)entry.getValue();
-		    boolean result=compareResults(masterFilename,imageLoadedList);
+		    boolean result=compareResults(commonDLLlistFileName,imageLoadedList);
 		    for (String value : imageLoadedList){
 		    	HashSet<String> images=image.get(key);
 		    	for (String image: images){
@@ -124,7 +125,7 @@ public class SysmonDetecter {
 		}
 	}
 	
-	public boolean compareResults(String masterFilename,HashSet<String> imageLoadedList){
+	public boolean compareResults(String commonDLLlistFileName,HashSet<String> imageLoadedList){
 	    boolean result=imageLoadedList.containsAll(masterList);
 		return result;
 	}
@@ -177,6 +178,37 @@ public class SysmonDetecter {
 		 System.out.println("False Positive count: "+falsePositiveCnt+", False Positive rate: "+falsePositiveRateS);
 		 System.out.println("False Negative count: "+falseNegativeCnt+", False Negative rate: "+falseNegativeRateS);
 	}
+	
+	public void readCommonDLLList(){
+		BufferedReader br=null;
+	    try {
+		      File f = new File(commonDLLlistFileName);
+		      br = new BufferedReader(new FileReader(f));
+		      String line;
+		      while ((line = br.readLine()) != null) {
+		    	  String dll=line.trim();
+		    	  masterList.add(dll);
+		      }
+	    } catch (IOException e) {
+		      System.out.println(e);
+		}finally{
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public void detelePrevFiles(String outDirname){
+		Path path = Paths.get(outDirname);
+		try(DirectoryStream<Path> ds = Files.newDirectoryStream(path, "*.*") ){
+		    for(Path deleteFilePath : ds){
+		             Files.delete(deleteFilePath);
+		    }
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
 	 public static void main(String args[]) {
 		 
 		 SysmonDetecter sysmonParser=new SysmonDetecter();
@@ -184,24 +216,16 @@ public class SysmonDetecter {
 			 String dirname=args[0];
 			 
 			 if(args.length>1){
-				 masterFilename=args[1];
+				 commonDLLlistFileName=args[1];
 			 }
 				
 			 if(args.length>2){
 				 outputDirName=args[2];
 			 }
-			    try {
-				      File f = new File(masterFilename);
-				      BufferedReader br = new BufferedReader(new FileReader(f));
-				      String line;
-				      while ((line = br.readLine()) != null) {
-				    	  String dll=line.trim();
-				    	  masterList.add(dll);
-				      }
-			    } catch (IOException e) {
-				      System.out.println(e);
-				    }
-			    
+			 log=new HashMap<Integer,HashSet>();
+			 image=new HashMap<Integer,HashSet>();
+			 sysmonParser.detelePrevFiles(outputDirName);
+			 sysmonParser.readCommonDLLList();
 			 sysmonParser.outputDetectedDlls(dirname);
 			 sysmonParser.outputDetectionRate();
 			 
