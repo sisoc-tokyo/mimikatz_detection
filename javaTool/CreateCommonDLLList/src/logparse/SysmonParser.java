@@ -13,9 +13,9 @@ import org.apache.commons.collections4.*;
 */
 public class SysmonParser {
 	 /**
-	 * file name of mimikatz
+	 * Specify file name of mimikatz
 	 */
-	private static final String MIMILATZ_MODULE_NAME = "mimikatz.exe";
+	private static final String MIMIKATZ_MODULE_NAME = "mimikatz.exe";
 	private static Map<Integer, HashSet<String>> log;
 	private HashSet<String> imageLoadedList;
 	
@@ -40,7 +40,7 @@ public class SysmonParser {
 					} else if (elem.startsWith("ImageLoaded:") && elem.endsWith("dll")) {
 						// Get Dll name
 						String imageLoaded = parseElement(elem);
-						if (image.contains(MIMILATZ_MODULE_NAME)) {
+						if (image.contains(MIMIKATZ_MODULE_NAME)) {
 							if (null == log.get(processId)) {
 								imageLoadedList = new HashSet<String>();
 							} else {
@@ -289,7 +289,7 @@ public class SysmonParser {
 	
 	private static void printUseage(){
 		System.out.println("Useage");
-		System.out.println("-d {directory path} {outputpath}");
+		System.out.println("-d {inputdirpath} {outputdirpath}");
 	}
 
 	public static void main(String args[]) {
@@ -297,7 +297,7 @@ public class SysmonParser {
 		String outputFilename = null;
 		String outDirname = null;
 		SysmonParser sysmonParser = new SysmonParser();
-		if (args.length == 0) {
+		if (args.length < 2) {
 			printUseage();
 		} else if (args[0].startsWith("-d")) {
 			// Process all files specified by -d directory.
