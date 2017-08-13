@@ -97,7 +97,7 @@ def pivot(eventlist):
             print("")
     # Please remove comment out if you want to see pivot table
     #imagept.to_csv("imagept.csv")
-    print(imagept)
+    #print(imagept)
 
 if __name__ == "__main__":
     sendrest(sys.argv[1:])
