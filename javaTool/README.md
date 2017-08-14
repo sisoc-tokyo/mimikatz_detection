@@ -1,3 +1,4 @@
+# Tracking mimikatz by Sysmon and Elasticsearch(Java Tool)
 These are tools to create Common DLL List from event logs and detect processes that matches the Common DLL List (Java)
 Tools are provided as Eclipse project format, so you can import these tools into Eclipse.
 We provide two tools:
@@ -14,3 +15,4 @@ This tool outputs processes that load all DLLs in Common DLL List and detection 
 Before using the tools, you should export Sysmon eventlogs as CSV format.
 Detail procedure is here(coming soon).
 
+By Mariko Fujimoto

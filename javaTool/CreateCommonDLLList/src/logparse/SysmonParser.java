@@ -6,22 +6,23 @@ import java.util.*;
 import org.apache.commons.collections4.*;
 
 /**
-* Parse CSV files exported from Sysmon event log.
-* Output DLLs loaded by mimikatz and Create Common DLL List.
-* @version 1.0
-* @author Mariko Fujimoto
-*/
+ * Parse CSV files exported from Sysmon event log. Output DLLs loaded by
+ * mimikatz and Create Common DLL List.
+ * 
+ * @version 1.0
+ * @author Mariko Fujimoto
+ */
 public class SysmonParser {
-	 /**
+	/**
 	 * Specify file name of mimikatz
 	 */
 	private static final String MIMIKATZ_MODULE_NAME = "mimikatz.exe";
 	private static Map<Integer, HashSet<String>> log;
 	private HashSet<String> imageLoadedList;
-	
+
 	private void readCSV(String filename) {
 		log = new HashMap<Integer, HashSet<String>>();
-		BufferedReader br=null;
+		BufferedReader br = null;
 		try {
 			File f = new File(filename);
 			br = new BufferedReader(new FileReader(f));
@@ -82,7 +83,6 @@ public class SysmonParser {
 
 			for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<Integer, HashSet> entry = (Map.Entry<Integer, HashSet>) it.next();
-				Object key = entry.getKey();
 				TreeSet<String> imageLoadedList = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 				imageLoadedList.addAll(entry.getValue());
 				for (String value : imageLoadedList) {
@@ -103,9 +103,10 @@ public class SysmonParser {
 
 	private boolean compareResults(String masterFilename) {
 		HashSet<String> masterList = new HashSet<String>();
+		BufferedReader br = null;
 		try {
 			File f = new File(masterFilename);
-			BufferedReader br = new BufferedReader(new FileReader(f));
+			br = new BufferedReader(new FileReader(f));
 			String line;
 			while ((line = br.readLine()) != null) {
 				String dll = line.trim();
@@ -113,6 +114,12 @@ public class SysmonParser {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally{
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		boolean result = masterList.equals(this.imageLoadedList);
@@ -121,11 +128,12 @@ public class SysmonParser {
 	}
 
 	/**
-	* Parse CSV files exported from Sysmon event log.
-	* Output DLLs loaded by mimikatz in each environment.
-	* @param inputDirname 
-	* @param outputDirname 
-	*/
+	 * Parse CSV files exported from Sysmon event log. Output DLLs loaded by
+	 * mimikatz in each environment.
+	 * 
+	 * @param inputDirname
+	 * @param outputDirname
+	 */
 	public void outputDllsForEachEnvironment(String inputDirname, String outputDirname) {
 		File dir = new File(inputDirname);
 		File[] files = dir.listFiles();
@@ -169,14 +177,14 @@ public class SysmonParser {
 	}
 
 	/**
-	* Create Common DLL list.
-	* Output DLLs loaded by mimikatz for all environment.
-	* Create Common DLL List.
-	* @param outputDirname 
-	*/
+	 * Create Common DLL list. Output DLLs loaded by mimikatz for all
+	 * environment. Create Common DLL List.
+	 * 
+	 * @param outputDirname
+	 */
 	public void outputAllResults(String outputDirname) {
 		Map<String, TreeSet<String>> dllMap = new HashMap<String, TreeSet<String>>();
-		BufferedReader br=null;
+		BufferedReader br = null;
 		try {
 			// Read DLL lists for each environment
 			File dir = new File(outputDirname);
@@ -196,14 +204,15 @@ public class SysmonParser {
 						dlls.add(dll);
 					}
 				}
-				// Use file name as environment name. The name is printed in result file to identify each environment
+				// Use file name as environment name. The name is printed in
+				// result file to identify each environment
 				String[] filenameArray = filename.split("\\.");
 				String envName = filenameArray[0];
 				dllMap.put(envName, dlls);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally{
+		} finally {
 			try {
 				br.close();
 			} catch (IOException e) {
@@ -230,7 +239,7 @@ public class SysmonParser {
 		outputDlls(intersection, outputDirname + "/CommonDLLlist.csv");
 		TreeSet<String> unionDlls = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		unionDlls.addAll(union);
-		
+
 		// Output DLL lists for all environment
 		File file = new File(outputDirname + "/AllDLLs.csv");
 		FileWriter filewriter = null;
@@ -274,8 +283,8 @@ public class SysmonParser {
 	}
 
 	/**
-	* Delete All previous files in outDirname
-	*/
+	 * Delete All previous files in outDirname
+	 */
 	private void detelePrevFiles(String outDirname) {
 		Path path = Paths.get(outDirname);
 		try (DirectoryStream<Path> ds = Files.newDirectoryStream(path, "*.*")) {
@@ -286,8 +295,8 @@ public class SysmonParser {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void printUseage(){
+
+	private static void printUseage() {
 		System.out.println("Useage");
 		System.out.println("-d {inputdirpath} {outputdirpath}");
 	}
@@ -305,11 +314,11 @@ public class SysmonParser {
 			if (args.length > 1) {
 				// Output result files in specified directory.
 				outDirname = args[2];
+				sysmonParser.detelePrevFiles(outDirname);
+				sysmonParser.outputDllsForEachEnvironment(inputDirname, outDirname);
+				sysmonParser.outputAllResults(outDirname);
+				System.out.println("Output DLL lists and Common DLL list in " + outDirname);
 			}
-			sysmonParser.detelePrevFiles(outDirname);
-			sysmonParser.outputDllsForEachEnvironment(inputDirname, outDirname);
-			sysmonParser.outputAllResults(outDirname);
-			System.out.println("Output DLL lists and Common DLL list in "+outDirname);
 		} else {
 			// Process single file
 			String filename = args[0];
