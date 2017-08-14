@@ -10,7 +10,9 @@ Main Class: logparse.SysmonParser
 
 Usage:
 -d {inputdirpath} {outputdirpath}
+
 {inputdirpath}: Full path of directory where exported Sysmon event log files exsist. 
+
 {outputdirpath}: Full path of directory where you want to output result files.
 
 Example:

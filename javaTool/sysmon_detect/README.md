@@ -9,9 +9,12 @@ Project name: sysmon_detect
 Main Class: logparse.SysmonDetecter
 
 Usage:
-iputdirpath} {Common DLL List path} {outputdirpath} (-dr)
+{iputdirpath} {Common DLL List path} {outputdirpath} (-dr)
+
 {inputdirpath}: Full path of directory where exported Sysmon event log files exsist. 
+
 {Common DLL List path}: Full path of Common DLL List
+
 {outputdirpath}: Full path of directory where you want to output result files.
 -dr(optional): If you evaluate detection rate using Common DLL Lists specify this option. 
 
