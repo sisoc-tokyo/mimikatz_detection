@@ -46,6 +46,7 @@ jsonstring = {
     }
 }
 
+# Counting number of detected DLL
 minlistnum = len(jsonstring["query"]["terms"]["event_data.ImageLoaded.keyword"])
 
 # Connect Elasticsearch Sever and send query
@@ -54,7 +55,7 @@ def sendrest(url):
         sys.exit("Usage: %s eslasticsearch_address:Port" %sys.argv[0])
 
     # Please specify your Elasticsearch search path
-    path = 'http://' + url[0] + '/winlogbeat-*/_search?pretty=true'
+    path = 'http://' + url[0] + '/winlogbeat-2017.08.15/_search?pretty=true'
     response = requests.get(path, data = json.dumps(jsonstring))
     parser(response)
 
@@ -77,6 +78,8 @@ def parser(response):
 
 # Create pivot table
 def pivot(eventlist):
+    # To avoid omission of long characters in columns
+    pd.set_option("display.max_colwidth", 80)
     eventdf = pd.DataFrame(eventlist)
     eventdf.columns = ["ProcessID","Time","Account","Image","ImageLoaded"]
     imagept = eventdf.pivot_table(index="ImageLoaded",columns="ProcessID",values="Time",aggfunc=lambda x: len(x),fill_value = 0)
