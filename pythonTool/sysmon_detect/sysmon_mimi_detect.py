@@ -55,7 +55,7 @@ def sendrest(url):
         sys.exit("Usage: %s eslasticsearch_address:Port" %sys.argv[0])
 
     # Please specify your Elasticsearch search path
-    path = 'http://' + url[0] + '/winlogbeat-2017.08.15/_search?pretty=true'
+    path = 'http://' + url[0] + '/winlogbeat-2017.08.23/_search?pretty=true'
     response = requests.get(path, data = json.dumps(jsonstring))
     parser(response)
 
@@ -70,9 +70,8 @@ def parser(response):
         taptolist = list(eventdata)
         eventlist.append(taptolist)
         #print(eventdata)
-        # Elasticsearch can't read more than 10,000 results.
         if i == 9999:
-            print("Elasticsearch can't read more than 10,000 results.")
+            print("Elasticsearch doesn't return  more than 10,000 results.")
             sys.exit()
     pivot(eventlist)
 
