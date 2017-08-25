@@ -4,7 +4,7 @@ These are tools for helping to detect execution of mimikatz.
 We focus on dlls loaded by mimikatz.
 Our research details is the following.
 
-<a href="https://hitcon.org/2017/CMT/agenda" target="blank">Tracking mimikatz by Sysmon and Elasticsearch</a>.
+<a href="https://hitcon.org/2017/CMT/agenda" target="blank">HITCON Community 2017 DAY 2 (8/26): Tracking mimikatz by Sysmon and Elasticsearch</a>.
 
 We provide the following tools.
 - Tools to create Common DLL List from event logs and detect processes that matches the Common DLL List (Java)
