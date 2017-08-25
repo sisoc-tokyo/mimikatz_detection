@@ -3,6 +3,7 @@
 These are tools for helping to detect execution of mimikatz.
 We focus on dlls loaded by mimikatz.
 Our research details is the following.
+
 <a href="https://hitcon.org/2017/CMT/agenda" target="blank">Tracking mimikatz by Sysmon and Elasticsearch</a>.
 
 We provide the following tools.
