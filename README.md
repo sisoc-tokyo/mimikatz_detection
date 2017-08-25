@@ -9,7 +9,7 @@ Our research details is the following.
 
 We provide the DLL Lists for helping mimikatz detection.
 
-https://github.com/sisoc-tokyo/mimikatz_detection/tree/master/javaTool
+https://github.com/sisoc-tokyo/mimikatz_detection/tree/master/DLLLists
 
 - DLLlist_{environment name}-mimi{yyyymmdd}.csv: DLL Lists loaded by mimikatz in specific environment
 - CommonDLLlist.csv: DLL Lists that is commonly loaded regardless of Windows and mimikatz versions
