@@ -19,7 +19,7 @@ public class SysmonDetecter {
 	 /**
 	 * Specify file name of mimikatz
 	 */
-	private static final String MIMIKATZ_MODULE_NAME = "mimikatz.exe";
+	private static final String MIMIKATZ_MODULE_NAME = "powershell.exe";
 	private static Map<Integer, HashSet> log;
 	private static Map<Integer, HashSet> image;
 	private static HashSet<String> commonDLLlist = new HashSet<String>();
@@ -35,32 +35,30 @@ public class SysmonDetecter {
 			BufferedReader br = new BufferedReader(new FileReader(f));
 			String line;
 			int processId = 0;
-
+			String date="";
+			String image="";
+			String imageLoaded ="";
+			
 			while ((line = br.readLine()) != null) {
 				String[] data = line.split(",", 0);
-
 				for (String elem : data) {
-
-					if (elem.startsWith("ProcessId:")) {
-						processId = Integer.parseInt(parseElement(elem));
+					if (elem.startsWith("情報")) {
+						  date = data[1];
+					} else if (elem.startsWith("ProcessId:")) {
+						processId = Integer.parseInt(parseElement(elem,": "));
 					} else if (elem.startsWith("Image:")) {
-						HashSet<String> images = image.get(processId);
-						if (null == images) {
-							images = new HashSet<String>();
-						}
-						images.add(parseElement(elem));
-						image.put(processId, images);
-					} else if (elem.startsWith("ImageLoaded:") && elem.endsWith("dll")) {
-						String imageLoaded = parseElement(elem);
-
-						HashSet<String> imageLoadedList;
+						image=parseElement(elem,": ");
+					}
+					if (elem.startsWith("ImageLoaded:") && elem.endsWith("dll")) {
+						imageLoaded = parseElement(elem,": ");
+						HashSet<EventLogData> evSet;
 						if (null == log.get(processId)) {
-							imageLoadedList = new HashSet<String>();
+							evSet=new HashSet<EventLogData>();
 						} else {
-							imageLoadedList = log.get(processId);
+							evSet = log.get(processId);
 						}
-						imageLoadedList.add(imageLoaded);
-						log.put(processId, imageLoadedList);
+						evSet.add(new EventLogData(date,imageLoaded,image));
+						log.put(processId, evSet);
 					}
 
 				}
@@ -73,9 +71,14 @@ public class SysmonDetecter {
 
 	}
 
-	private String parseElement(String elem) {
-		String elems[] = elem.split(": ");
-		String value = elems[1].trim();
+	private String parseElement(String elem, String delimiter) {
+		String value="";
+		try{
+		String elems[] = elem.split(delimiter);
+		value = elems[1].trim();
+		}catch (RuntimeException e){
+			e.printStackTrace();
+		}
 		return value;
 	}
 
@@ -93,19 +96,23 @@ public class SysmonDetecter {
 			for (Iterator it = map.entrySet().iterator(); it.hasNext();) {
 				Map.Entry<Integer, HashSet> entry = (Map.Entry<Integer, HashSet>) it.next();
 				Object processId = entry.getKey();
-				HashSet<String> imageLoadedList = (HashSet<String>) entry.getValue();
-				boolean result = isMatchWithCommonDLLlist(commonDLLlistFileName, imageLoadedList);
-				for (String value : imageLoadedList) {
-					HashSet<String> images = image.get(processId);
-					for (String image : images) {
-						pw.println(processId + "," + value + ", " + image + ", " + result);
-					}
+				HashSet<EventLogData> evS = (HashSet<EventLogData>) entry.getValue();
+				HashSet<String> imageLoadedList = new HashSet<String>();
+				for (EventLogData ev: evS) {
+					imageLoadedList.add(ev.getImageLoaded());
 				}
-				HashSet<String> images = image.get(processId);
+				boolean result = isMatchWithCommonDLLlist(commonDLLlistFileName, imageLoadedList);
+				for (EventLogData ev: evS) {
+						pw.println(processId + "," +ev.getImageLoaded() + ", " + ev.getImage() + ", " +ev.getDate()+", " +result);
+				}
 				boolean containsMimikatz = false;
-				for (String image : images) {
+				HashSet<EventLogData> evSet = log.get(processId);
+				HashSet<String> imageList=new HashSet<String>();
+				for (EventLogData ev : evSet) {
+					String image=ev.getImage();
 					if (image.endsWith(MIMIKATZ_MODULE_NAME)) {
 						containsMimikatz = true;
+						imageList.add(image);
 						break;
 					}
 				}
@@ -116,7 +123,16 @@ public class SysmonDetecter {
 					}
 				} else {
 					if (containsMimikatz) {
+						boolean mimiProcessExists=false;
+						for(String image : imageList){
+							if(image.endsWith(MIMIKATZ_MODULE_NAME)){
+								mimiProcessExists=true;
+								break;
+							}
+						}
+						if(!mimiProcessExists){
 						falseNegativeCnt++;
+						}
 					}
 				}
 			}
