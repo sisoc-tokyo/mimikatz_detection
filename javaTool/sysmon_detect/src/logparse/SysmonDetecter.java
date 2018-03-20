@@ -28,6 +28,7 @@ public class SysmonDetecter {
 	private static int falsePositiveCnt = 0;
 	private static int falseNegativeCnt = 0;
 	
+	private int totalProcessCnt=0;
 	private int processCntMimi=0;
 	private int detectedProcessCntMimi=0;
 	private void readCSV(String filename) {
@@ -178,6 +179,8 @@ public class SysmonDetecter {
 			if (filename.endsWith(".csv")) {
 				readCSV(file.getAbsolutePath());
 				outputLoadedDLLs(log, this.outputDirName + "/" + filename);
+				totalProcessCnt=totalProcessCnt+=log.size();
+				log.clear();
 			} else {
 				continue;
 			}
@@ -193,7 +196,6 @@ public class SysmonDetecter {
 		BufferedWriter bw = null;
 		PrintWriter pw = null;
 
-		int totalProcessCnt = log.size();
 		// 本来のmimikatzのプロセス数
 		int normalProcessCnt =totalProcessCnt-this.processCntMimi;
 		
