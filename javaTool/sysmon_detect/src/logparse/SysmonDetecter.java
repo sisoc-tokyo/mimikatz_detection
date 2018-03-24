@@ -196,13 +196,13 @@ public class SysmonDetecter {
 		BufferedWriter bw = null;
 		PrintWriter pw = null;
 
-		// 本来のmimikatzのプロセス数
+		// mimikatz以外のプロセス数
 		int normalProcessCnt =totalProcessCnt-this.processCntMimi;
 		
 		// mimikatz以外と判定したプロセスの割合
-		double trueNegativeRate = (double) (totalProcessCnt-this.detectedProcessCntMimi) / (double)totalProcessCnt;
-		// mimikatzと判定したプロセスの割合
-		double truePositiveRate = (double) this.detectedProcessCntMimi / (double)totalProcessCnt;
+		double trueNegativeRate = (double) (totalProcessCnt-this.detectedProcessCntMimi) / (double)normalProcessCnt;
+		// 正しくmimikatzと判定したプロセスの割合
+		double truePositiveRate = (double) this.detectedProcessCntMimi / (double)processCntMimi;
 		
 		// mimikatz以外のプロセスをmimikatzと検知した割合
 		double falsePositiveRate = (double) falsePositiveCnt / totalProcessCnt;
